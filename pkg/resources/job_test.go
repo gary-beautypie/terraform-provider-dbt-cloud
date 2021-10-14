@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"testing"
 
+    "github.com/gthesheep/terraform-provider-dbt-cloud/pkg/dbt_cloud"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccDbtCloudJobResource(t *testing.T) {
@@ -44,6 +46,7 @@ func TestAccDbtCloudJobResource(t *testing.T) {
 
 	resource.ParallelTest(t, resource.TestCase{
 		Providers: providers(),
+		CheckDestroy: testAccDbtCloudJobDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: config,
@@ -51,4 +54,28 @@ func TestAccDbtCloudJobResource(t *testing.T) {
 			},
 		},
 	})
+}
+
+func testAccDbtCloudJobDestroy(s *terraform.State) error {
+  providers := providers()
+  c := providers["dbt_cloud"].Meta().(*dbt_cloud.Client)
+
+  for _, resource := range s.RootModule().Resources {
+    if resource.Type != "dbt_cloud_job" {
+      continue
+    }
+
+    resourceID := resource.Primary.ID
+    response, err := c.GetJob(string(resourceID))
+    if err == nil {
+      if (response != nil) && (fmt.Sprint(*response.ID) == resourceID) {
+        return fmt.Errorf("Job (%s) still exists.", resourceID)
+      }
+
+      return nil
+    }
+
+  }
+
+  return nil
 }

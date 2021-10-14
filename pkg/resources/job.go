@@ -3,7 +3,6 @@ package resources
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"strconv"
 
 	"github.com/gthesheep/terraform-provider-dbt-cloud/pkg/dbt_cloud"
@@ -210,7 +209,6 @@ func resourceJobUpdate(ctx context.Context, d *schema.ResourceData, m interface{
 func resourceJobDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*dbt_cloud.Client)
 	jobId := d.Id()
-	log.Printf("Job deleting is not yet supported in DBT Cloud, setting state to deleted")
 
 	var diags diag.Diagnostics
 
